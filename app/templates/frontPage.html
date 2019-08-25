@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+<!-- import form receiving model -->
+{% import 'bootstrap/wtf.html' as wtf %}
+
+    {% block app_content %}
+        <!-- ########## -->
+
+        <h1>Developers Guide & Tutorial</h1>
+        <br>
+        <h3>API usages</h3>
+        <br>
+
+        <!-- 已发表的言论 -->
+        {% if usage_infos %}
+            {% for usage_info in usage_infos %}
+            <div class="container">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <h4>API format:    {{ usage_info.api_format }}</h4>
+                    </div>
+                    <div class="panel-footer">
+                        <b>Method:   </b> {{ usage_info.method }}
+                    </div>
+                    <div class="panel-footer">
+                        <b>Description:   </b> {{ usage_info.description }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="container">
+                <div class="panel panel-default">
+                    <!--<div class="panel-heading">-->
+                        <!--<b>Administer</b> said:-->
+                    <!--</div>-->
+                    <div class="panel-body">
+                        <h4>No more usage informations currently.</h4>
+                    </div>
+                    <div class="panel-footer">
+                        <b>Administer</b> at 2019-04-20/17:00:00
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+    {% endblock %}
