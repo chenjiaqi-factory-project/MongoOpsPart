@@ -8,4 +8,4 @@ app.config.from_object(Config)
 bootstrap = Bootstrap(app)
 mongo = PyMongo(app)
 
-from app import routes, api
+from app import routes, gas_api, water_elec_api

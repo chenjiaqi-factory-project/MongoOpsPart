@@ -3,20 +3,36 @@ import requests
 
 if __name__ == '__main__':
 
-    record = {
-        "location": "地点A",
+    # record = {
+    #     "boiler_room": "地点A",
+    #     "boiler_no": "1号锅炉",
+    #     "datetime": "2019-8-25 18:23:22",
+    #     "date": "2019-8-25",
+    #     "time": "18:23:22",
+    #     "gas_indicator": "762817.827",
+    #     "gas_consumption": "233.233",
+    #     "employee_no": "EN0136"
+    # }
+    #
+    # result = requests.post("http://127.0.0.1:5000/api/gas/document",
+    #                        data=record)
+
+    record2 = {
+        "factory_no": "工厂A",
         "datetime": "2019-8-25 18:23:22",
-        "boiler_no": "1号锅炉",
-        "gas_consumption": "233.233",
-        "elec_consumption": "666.666",
-        "water_consumption": "41.1",
-        "water_out_temperature": "89.2",
-        "water_in_temperature": "32.4",
-        "employee_no": "0136 号员工"
+        "date": "2019-8-25",
+        "time": "18:23:22",
+        "elec_indicator": "762817.827",
+        "elec_consumption": "233.233",
+        "water_indicator": "762817.827",
+        "water_consumption": "233.233",
+        "water_out_temperature": "80",
+        "water_in_temperature": "23",
+        "employee_no": "EN0136"
     }
 
-    result = requests.post("http://127.0.0.1:5000/api/document",
-                           data=record)
+    result = requests.post("http://127.0.0.1:5000/api/water-elec/document",
+                           data=record2)
 
     print(result)
 
