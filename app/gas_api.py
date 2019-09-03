@@ -148,6 +148,17 @@ def get_gas_document_by_datetime_fuzzy(datetime):
     return jsonify(data)
 
 
+# Get document by its date in fuzzy mode
+@app.route("/api/gas/document/date/fuzzy/<string:date>", methods=['GET'])
+def get_gas_document_by_date_fuzzy(date):
+    data = list()
+    # maybe the data_feature in different items are same
+    for record in mongo.db.Gas_Collection.find({"date": {'$regex': date}}):
+        record['_id'] = str(record['_id'])
+        data.append(record)
+    return jsonify(data)
+
+
 # Fuzzy Search by boiler_no, employee_no, boiler_room or datetime
 @app.route("/api/gas/document/doc-search/fuzzy/<string:keyword>", methods=['GET'])
 def search_gas_document_fuzzy_single_keyword(keyword):
