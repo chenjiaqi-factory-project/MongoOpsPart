@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="08ea7a40-d43a-4b59-a536-69e4a5632847" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/app/gas_api.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/gas_api.py" afterDir="false" />
-    </list>
+    <list default="true" id="08ea7a40-d43a-4b59-a536-69e4a5632847" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -64,13 +62,13 @@
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="html" value="1" />
-          <entry key="py" value="3886" />
+          <entry key="py" value="3895" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="HTML" value="1" />
-          <entry key="Python" value="3886" />
+          <entry key="Python" value="3895" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
@@ -149,12 +147,12 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/gas_api.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="238">
-              <caret line="301" column="12" lean-forward="true" selection-start-line="301" selection-start-column="12" selection-end-line="301" selection-end-column="60" />
+            <state relative-caret-position="-449">
+              <caret line="330" column="21" lean-forward="true" selection-start-line="330" selection-start-column="21" selection-end-line="330" selection-end-column="21" />
               <folding>
                 <element signature="e#0#26#0" expanded="true" />
-                <marker date="1567848945341" expanded="true" signature="6150:6542" ph="..." />
-                <marker date="1567848945341" expanded="true" signature="14608:15211" ph="..." />
+                <marker date="1567849359906" expanded="true" signature="6150:6542" ph="..." />
+                <marker date="1567849359906" expanded="true" signature="14550:15153" ph="..." />
               </folding>
             </state>
           </provider>
@@ -352,7 +350,6 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1440" height="900" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.1509299" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -474,12 +471,12 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app/gas_api.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="238">
-          <caret line="301" column="12" lean-forward="true" selection-start-line="301" selection-start-column="12" selection-end-line="301" selection-end-column="60" />
+        <state relative-caret-position="-449">
+          <caret line="330" column="21" lean-forward="true" selection-start-line="330" selection-start-column="21" selection-end-line="330" selection-end-column="21" />
           <folding>
             <element signature="e#0#26#0" expanded="true" />
-            <marker date="1567848945341" expanded="true" signature="6150:6542" ph="..." />
-            <marker date="1567848945341" expanded="true" signature="14608:15211" ph="..." />
+            <marker date="1567849359906" expanded="true" signature="6150:6542" ph="..." />
+            <marker date="1567849359906" expanded="true" signature="14550:15153" ph="..." />
           </folding>
         </state>
       </provider>

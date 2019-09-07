@@ -244,8 +244,8 @@ def search_gas_document_fuzzy_single_keyword(keyword):
 
 
 # Gas Calculating Functions
-@app.route("/api/gas/calculating/gas-consumption/<string:first_date>/<string:last_date>"
-           "/<string:boiler_room>/<string:boiler_no>", methods=['GET'])
+@app.route("/api/gas/calculating/gas-consumption/<string:boiler_room>/<string:boiler_no>"
+           "/<string:first_date>/<string:last_date>", methods=['GET'])
 def calculate_gas_consumption_by_given_date(first_date, last_date, boiler_room, boiler_no):
     data = list()
     result_dict = {}
