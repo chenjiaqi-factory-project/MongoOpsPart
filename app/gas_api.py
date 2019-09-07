@@ -166,7 +166,7 @@ def get_gas_document_by_boiler_room_and_no_fuzzy(boiler_room, boiler_no):
     search_list.append({'boiler_no': {'$regex': boiler_no}})
     # using fuzzy mode with regex
     # 'and' search
-    for record in mongo.db.Competition.find({'$and': search_list}):
+    for record in mongo.db.Gas_Collection.find({'$and': search_list}):
         record['_id'] = str(record['_id'])
         data.append(record)
     return jsonify(data)
@@ -249,6 +249,7 @@ def search_gas_document_fuzzy_single_keyword(keyword):
 def calculate_gas_consumption_by_given_date(first_date, last_date, boiler_room, boiler_no):
     data = list()
     result_dict = {}
+    # assemble url
     search_first_url = 'http://' + Config.LOCALHOST_IP_PORT + \
                        url_for('get_gas_document_by_boiler_room_and_no_and_date', boiler_room=boiler_room,
                                boiler_no=boiler_no, date=first_date)
@@ -257,35 +258,110 @@ def calculate_gas_consumption_by_given_date(first_date, last_date, boiler_room, 
                               boiler_no=boiler_no, date=last_date)
     first_date_doc_list = get_api_info(requests.get(search_first_url))
     last_date_doc_list = get_api_info(requests.get(search_last_url))
-    print(first_date_doc_list)
-    print(last_date_doc_list)
     # if all things are correct
     if len(first_date_doc_list) >= 1 and len(last_date_doc_list) >= 1:
         first_doc = first_date_doc_list[0]
         last_doc = last_date_doc_list[0]
-        gas_consumption = round(abs(float(first_doc['gas_indicator']) - float(last_doc['gas_indicator'])), 3)
-        result_dict['gas_consumption'] = gas_consumption
+        gas_consumption = round(float(first_doc['gas_indicator']) - float(last_doc['gas_indicator']), 3)
+        if gas_consumption < 0:
+            gas_consumption_type = 'decrease'
+        elif gas_consumption == 0:
+            gas_consumption_type = 'invariant'
+        else:
+            gas_consumption_type = 'increase'
+        result_dict['gas_consumption'] = abs(gas_consumption)
+        result_dict['gas_consumption_type'] = gas_consumption_type
         result_dict['first_document'] = first_doc
         result_dict['last_document'] = last_doc
     # else Cannot find all relative document
     elif len(first_date_doc_list) < 1 and len(last_date_doc_list) < 1:
         result_dict['gas_consumption'] = 0
+        result_dict['gas_consumption_type'] = 'error'
         result_dict['first_document'] = None
         result_dict['last_document'] = None
     # else Cannot find first relative document
     elif len(first_date_doc_list) < 1:
         last_doc = last_date_doc_list[0]
         result_dict['gas_consumption'] = 0
+        result_dict['gas_consumption_type'] = 'error'
         result_dict['first_document'] = None
         result_dict['last_document'] = last_doc
     # else Cannot find last relative document
     elif len(last_date_doc_list) < 1:
         first_doc = first_date_doc_list[0]
         result_dict['gas_consumption'] = 0
+        result_dict['gas_consumption_type'] = 'error'
         result_dict['first_document'] = first_doc
         result_dict['last_document'] = None
     # return result
     data.append(result_dict)
+    return jsonify(data)
+
+
+# Gas Calculating by given boiler_room and boiler_no successively
+@app.route("/api/gas/calculating/gas-consumption/successive/<string:boiler_room>/<string:boiler_no>", methods=['GET'])
+def calculate_gas_consumption_successive_by_boiler_room_and_no(boiler_room, boiler_no):
+    data = list()
+    # assemble url
+    search_url = 'http://' + Config.LOCALHOST_IP_PORT + \
+                 url_for('get_gas_document_by_boiler_room_and_no_fuzzy', boiler_room=boiler_room,
+                         boiler_no=boiler_no)
+    search_list = get_api_info(requests.get(search_url))
+    # if there are at least 2 docs, that's mean it can be calculated
+    if len(search_list) >= 2:
+        # sorted by date
+        search_list = sorted(search_list, key=lambda doc: doc['date'])
+        flag = 0
+        while flag < len(search_list):
+            result_dict = {}
+            gas_consumption = round(float(search_list[flag]['gas_indicator'])
+                                    - float(search_list[flag-1]['gas_indicator']), 3)
+            if gas_consumption < 0:
+                gas_consumption_type = 'decrease'
+            elif gas_consumption == 0:
+                gas_consumption_type = 'invariant'
+            else:
+                gas_consumption_type = 'increase'
+            result_dict['gas_consumption'] = abs(gas_consumption)
+            result_dict['gas_consumption_type'] = gas_consumption_type
+            result_dict['first_document'] = search_list[flag]
+            result_dict['last_document'] = search_list[flag-1]
+            data.append(result_dict)
+            # flag add 1
+            flag += 1
+    elif len(search_list) == 1:
+        error_dict = {}
+        error_dict['gas_consumption'] = 0
+        error_dict['gas_consumption_type'] = 'error'
+        error_dict['first_document'] = search_list[0]
+        error_dict['last_document'] = None
+        data.append(error_dict)
+    else:
+        error_dict = {}
+        error_dict['gas_consumption'] = 0
+        error_dict['gas_consumption_type'] = 'error'
+        error_dict['first_document'] = None
+        error_dict['last_document'] = None
+        data.append(error_dict)
+    # return result
+    return jsonify(data)
+
+
+# Gas Calculating by given boiler_room and boiler_no successively
+@app.route("/api/gas/calculating/gas-consumption/successive/<string:boiler_room>/<string:boiler_no>"
+           "/<<string:first_date>/<string:last_date>>", methods=['GET'])
+def calculate_gas_consumption_successive_by_boiler_room_and_no_and_date(boiler_room, boiler_no, first_date, last_date):
+    data = list()
+    # assemble url
+    search_url = 'http://' + Config.LOCALHOST_IP_PORT + \
+                 url_for('calculate_gas_consumption_successive_by_boiler_room_and_no', boiler_room=boiler_room,
+                         boiler_no=boiler_no)
+    # search list has been sorted!!
+    search_list = get_api_info(requests.get(search_url))
+    for doc_dict in search_list:
+        if doc_dict.first_document.date > first_date and doc_dict.last_document.date < last_date:
+            data.append(doc_dict)
+    # return search result
     return jsonify(data)
 
 
