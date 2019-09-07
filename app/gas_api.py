@@ -263,12 +263,12 @@ def calculate_gas_consumption_by_given_date(first_date, last_date, boiler_room, 
         first_doc = first_date_doc_list[0]
         last_doc = last_date_doc_list[0]
         gas_consumption = round(float(first_doc['gas_indicator']) - float(last_doc['gas_indicator']), 3)
-        if gas_consumption < 0:
-            gas_consumption_type = 'decrease'
+        if gas_consumption > 0:
+            gas_consumption_type = '减少'
         elif gas_consumption == 0:
-            gas_consumption_type = 'invariant'
+            gas_consumption_type = '持平'
         else:
-            gas_consumption_type = 'increase'
+            gas_consumption_type = '增加'
         result_dict['gas_consumption'] = abs(gas_consumption)
         result_dict['gas_consumption_type'] = gas_consumption_type
         result_dict['first_document'] = first_doc
@@ -316,12 +316,12 @@ def calculate_gas_consumption_successive_by_boiler_room_and_no(boiler_room, boil
             result_dict = {}
             gas_consumption = round(float(search_list[flag - 1]['gas_indicator'])
                                     - float(search_list[flag]['gas_indicator']), 3)
-            if gas_consumption < 0:
-                gas_consumption_type = 'decrease'
+            if gas_consumption > 0:
+                gas_consumption_type = '减少'
             elif gas_consumption == 0:
-                gas_consumption_type = 'invariant'
+                gas_consumption_type = '持平'
             else:
-                gas_consumption_type = 'increase'
+                gas_consumption_type = '增加'
             result_dict['gas_consumption'] = abs(gas_consumption)
             result_dict['gas_consumption_type'] = gas_consumption_type
             result_dict['first_document'] = search_list[flag - 1]
