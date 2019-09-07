@@ -276,21 +276,21 @@ def calculate_gas_consumption_by_given_date(first_date, last_date, boiler_room, 
     # else Cannot find all relative document
     elif len(first_date_doc_list) < 1 and len(last_date_doc_list) < 1:
         result_dict['gas_consumption'] = 0
-        result_dict['gas_consumption_type'] = 'error'
+        result_dict['gas_consumption_type'] = '错误'
         result_dict['first_document'] = None
         result_dict['last_document'] = None
     # else Cannot find first relative document
     elif len(first_date_doc_list) < 1:
         last_doc = last_date_doc_list[0]
         result_dict['gas_consumption'] = 0
-        result_dict['gas_consumption_type'] = 'error'
+        result_dict['gas_consumption_type'] = '错误'
         result_dict['first_document'] = None
         result_dict['last_document'] = last_doc
     # else Cannot find last relative document
     elif len(last_date_doc_list) < 1:
         first_doc = first_date_doc_list[0]
         result_dict['gas_consumption'] = 0
-        result_dict['gas_consumption_type'] = 'error'
+        result_dict['gas_consumption_type'] = '错误'
         result_dict['first_document'] = first_doc
         result_dict['last_document'] = None
     # return result
@@ -332,14 +332,14 @@ def calculate_gas_consumption_successive_by_boiler_room_and_no(boiler_room, boil
     elif len(search_list) == 1:
         error_dict = {}
         error_dict['gas_consumption'] = 0
-        error_dict['gas_consumption_type'] = 'error'
+        error_dict['gas_consumption_type'] = '错误'
         error_dict['first_document'] = search_list[0]
         error_dict['last_document'] = None
         data.append(error_dict)
     else:
         error_dict = {}
         error_dict['gas_consumption'] = 0
-        error_dict['gas_consumption_type'] = 'error'
+        error_dict['gas_consumption_type'] = '错误'
         error_dict['first_document'] = None
         error_dict['last_document'] = None
         data.append(error_dict)
