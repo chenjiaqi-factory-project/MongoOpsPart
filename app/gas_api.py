@@ -310,12 +310,12 @@ def calculate_gas_consumption_successive_by_boiler_room_and_no(boiler_room, boil
     # if there are at least 2 docs, that's mean it can be calculated
     if len(search_list) >= 2:
         # sorted by date
-        search_list = sorted(search_list, key=lambda doc: doc['date'])
-        flag = 0
+        search_list = sorted(search_list, key=lambda doc: doc['datetime'])
+        flag = 1
         while flag < len(search_list):
             result_dict = {}
-            gas_consumption = round(float(search_list[flag]['gas_indicator'])
-                                    - float(search_list[flag-1]['gas_indicator']), 3)
+            gas_consumption = round(float(search_list[flag - 1]['gas_indicator'])
+                                    - float(search_list[flag]['gas_indicator']), 3)
             if gas_consumption < 0:
                 gas_consumption_type = 'decrease'
             elif gas_consumption == 0:
@@ -324,8 +324,8 @@ def calculate_gas_consumption_successive_by_boiler_room_and_no(boiler_room, boil
                 gas_consumption_type = 'increase'
             result_dict['gas_consumption'] = abs(gas_consumption)
             result_dict['gas_consumption_type'] = gas_consumption_type
-            result_dict['first_document'] = search_list[flag]
-            result_dict['last_document'] = search_list[flag-1]
+            result_dict['first_document'] = search_list[flag - 1]
+            result_dict['last_document'] = search_list[flag]
             data.append(result_dict)
             # flag add 1
             flag += 1
@@ -358,8 +358,9 @@ def calculate_gas_consumption_successive_by_boiler_room_and_no_and_date(boiler_r
                          boiler_no=boiler_no)
     # search list has been sorted!!
     search_list = get_api_info(requests.get(search_url))
+    print(search_list)
     for doc_dict in search_list:
-        if doc_dict.first_document.date > first_date and doc_dict.last_document.date < last_date:
+        if doc_dict['first_document']['date'] >= first_date and doc_dict['last_document']['date'] <= last_date:
             data.append(doc_dict)
     # return search result
     return jsonify(data)
