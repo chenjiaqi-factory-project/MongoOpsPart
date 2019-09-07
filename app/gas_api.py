@@ -349,7 +349,7 @@ def calculate_gas_consumption_successive_by_boiler_room_and_no(boiler_room, boil
 
 # Gas Calculating by given boiler_room and boiler_no successively
 @app.route("/api/gas/calculating/gas-consumption/successive/<string:boiler_room>/<string:boiler_no>"
-           "/<<string:first_date>/<string:last_date>>", methods=['GET'])
+           "/<string:first_date>/<string:last_date>", methods=['GET'])
 def calculate_gas_consumption_successive_by_boiler_room_and_no_and_date(boiler_room, boiler_no, first_date, last_date):
     data = list()
     # assemble url
