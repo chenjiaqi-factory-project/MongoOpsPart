@@ -3,7 +3,9 @@ from flask import jsonify
 from flask import request, url_for, redirect
 from werkzeug.http import HTTP_STATUS_CODES
 from bson.objectid import ObjectId
-from func_pack import create_rec_hash
+from func_pack import create_rec_hash, get_api_info
+from config import Config
+import requests
 
 
 # Get all gas document infos
@@ -104,12 +106,67 @@ def delete_gas_document(rid):
     return jsonify(data)
 
 
-# Get document info by its name in fuzzy mode
+# Get document by its boiler_room, boiler_no and date
+# Mention! There is no 'fuzzy mode' in this function
+@app.route("/api/gas/document/boiler-room-and-no-and-datetime"
+           "/<string:boiler_room>/<string:boiler_no>/<string:date>", methods=['GET'])
+def get_gas_document_by_boiler_room_and_no_and_date(boiler_room, boiler_no, date):
+    data = list()
+    data_search = list()
+    # maybe the data_feature in different items are same
+    for record in mongo.db.Gas_Collection.find({"date": {'$regex': date}}):
+        record['_id'] = str(record['_id'])
+        data_search.append(record)
+    # search the boiler_room, boiler_no field in the 'data_search' list
+    for document in data_search:
+        if boiler_room == document['boiler_room'] and boiler_no == document['boiler_no']:
+            data.append(document)
+    return jsonify(data)
+
+
+# Get document by its date
+@app.route("/api/gas/document/date/<string:date>", methods=['GET'])
+def get_gas_document_by_date(date):
+    data = list()
+    # maybe the data_feature in different items are same
+    for record in mongo.db.Gas_Collection.find({"date": date}):
+        record['_id'] = str(record['_id'])
+        data.append(record)
+    return jsonify(data)
+
+
+# Get document info by its boiler_room in fuzzy mode
+@app.route("/api/gas/document/boiler-room/fuzzy/<string:boiler_room>", methods=['GET'])
+def get_gas_document_by_boiler_room_fuzzy(boiler_room):
+    data = list()
+    # using fuzzy mode with regex
+    for record in mongo.db.Gas_Collection.find({"boiler_room": {'$regex': boiler_room}}):
+        record['_id'] = str(record['_id'])
+        data.append(record)
+    return jsonify(data)
+
+
+# Get document info by its boiler_no in fuzzy mode
 @app.route("/api/gas/document/boiler-no/fuzzy/<string:boiler_no>", methods=['GET'])
 def get_gas_document_by_boiler_no_fuzzy(boiler_no):
     data = list()
     # using fuzzy mode with regex
     for record in mongo.db.Gas_Collection.find({"boiler_no": {'$regex': boiler_no}}):
+        record['_id'] = str(record['_id'])
+        data.append(record)
+    return jsonify(data)
+
+
+# Get document info by its boiler_no and boiler_room in fuzzy mode
+@app.route("/api/gas/document/boiler-room-and-no/fuzzy/<string:boiler_room>/<string:boiler_no>", methods=['GET'])
+def get_gas_document_by_boiler_room_and_no_fuzzy(boiler_room, boiler_no):
+    data = list()
+    search_list = list()
+    search_list.append({'boiler_room': {'$regex': boiler_room}})
+    search_list.append({'boiler_no': {'$regex': boiler_no}})
+    # using fuzzy mode with regex
+    # 'and' search
+    for record in mongo.db.Competition.find({'$and': search_list}):
         record['_id'] = str(record['_id'])
         data.append(record)
     return jsonify(data)
@@ -183,6 +240,52 @@ def search_gas_document_fuzzy_single_keyword(keyword):
     # data_dedup = list(set(data))
     # data_dedup.sort(key=data.index)
     # return jsonify(data_dedup)
+    return jsonify(data)
+
+
+# Gas Calculating Functions
+@app.route("/api/gas/calculating/gas-consumption/<string:first_date>/<string:last_date>"
+           "/<string:boiler_room>/<string:boiler_no>", methods=['GET'])
+def calculate_gas_consumption_by_given_date(first_date, last_date, boiler_room, boiler_no):
+    data = list()
+    result_dict = {}
+    search_first_url = 'http://' + Config.LOCALHOST_IP_PORT + \
+                       url_for('get_gas_document_by_boiler_room_and_no_and_date', boiler_room=boiler_room,
+                               boiler_no=boiler_no, date=first_date)
+    search_last_url = 'http://' + Config.LOCALHOST_IP_PORT + \
+                      url_for('get_gas_document_by_boiler_room_and_no_and_date', boiler_room=boiler_room,
+                              boiler_no=boiler_no, date=last_date)
+    first_date_doc_list = get_api_info(requests.get(search_first_url))
+    last_date_doc_list = get_api_info(requests.get(search_last_url))
+    print(first_date_doc_list)
+    print(last_date_doc_list)
+    # if all things are correct
+    if len(first_date_doc_list) >= 1 and len(last_date_doc_list) >= 1:
+        first_doc = first_date_doc_list[0]
+        last_doc = last_date_doc_list[0]
+        gas_consumption = round(abs(float(first_doc['gas_indicator']) - float(last_doc['gas_indicator'])), 3)
+        result_dict['gas_consumption'] = gas_consumption
+        result_dict['first_document'] = first_doc
+        result_dict['last_document'] = last_doc
+    # else Cannot find all relative document
+    elif len(first_date_doc_list) < 1 and len(last_date_doc_list) < 1:
+        result_dict['gas_consumption'] = 0
+        result_dict['first_document'] = None
+        result_dict['last_document'] = None
+    # else Cannot find first relative document
+    elif len(first_date_doc_list) < 1:
+        last_doc = last_date_doc_list[0]
+        result_dict['gas_consumption'] = 0
+        result_dict['first_document'] = None
+        result_dict['last_document'] = last_doc
+    # else Cannot find last relative document
+    elif len(last_date_doc_list) < 1:
+        first_doc = first_date_doc_list[0]
+        result_dict['gas_consumption'] = 0
+        result_dict['first_document'] = first_doc
+        result_dict['last_document'] = None
+    # return result
+    data.append(result_dict)
     return jsonify(data)
 
 

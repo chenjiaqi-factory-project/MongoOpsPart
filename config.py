@@ -8,3 +8,5 @@ class Config(object):
 
     MONGO_URI = "mongodb://dbuser:dbpassword@45.78.76.192:27017/testdb"
     # MONGO_URI = os.environ.get('MONGO_URI')
+
+    LOCALHOST_IP_PORT = '127.0.0.1:5000'
