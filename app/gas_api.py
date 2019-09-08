@@ -243,8 +243,8 @@ def search_gas_document_fuzzy_single_keyword(keyword):
     return jsonify(data)
 
 
-# Gas Calculating Functions
-@app.route("/api/gas/calculating/gas-consumption/<string:boiler_room>/<string:boiler_no>"
+# Gas Calculating Functions by a exact given date
+@app.route("/api/gas/calculating/gas-consumption/exact-date/<string:boiler_room>/<string:boiler_no>"
            "/<string:first_date>/<string:last_date>", methods=['GET'])
 def calculate_gas_consumption_by_given_date(first_date, last_date, boiler_room, boiler_no):
     data = list()
@@ -347,6 +347,45 @@ def calculate_gas_consumption_successive_by_boiler_room_and_no(boiler_room, boil
     return jsonify(data)
 
 
+# Gas Calculating Functions by a inexact given date
+@app.route("/api/gas/calculating/gas-consumption/inexact-date/<string:boiler_room>/<string:boiler_no>"
+           "/<string:first_date>/<string:last_date>", methods=['GET'])
+def calculate_gas_consumption_by_inexact_date(first_date, last_date, boiler_room, boiler_no):
+    data = list()
+    # assemble url
+    search_url = 'http://' + Config.LOCALHOST_IP_PORT + \
+                 url_for('calculate_gas_consumption_successive_by_boiler_room_and_no', boiler_room=boiler_room,
+                         boiler_no=boiler_no)
+    # search list has been sorted!!
+    search_list = get_api_info(requests.get(search_url))
+    successive_list = list()
+    for doc_dict in search_list:
+        if doc_dict['first_document']['date'] >= first_date and doc_dict['last_document']['date'] <= last_date:
+            successive_list.append(doc_dict)
+    # the 'first_document['date'] of first item' subtract 'last_document['date'] of last item'
+    # if there is not any error:
+    result_dict = {}
+    if successive_list[0]['gas_consumption_type'] != '错误':
+        gas_consumption = round(float(successive_list[0]['first_document']['gas_indicator'])
+                                - float(successive_list[-1]['last_document']['gas_indicator']), 3)
+        if gas_consumption > 0:
+            gas_consumption_type = '减少'
+        elif gas_consumption == 0:
+            gas_consumption_type = '持平'
+        else:
+            gas_consumption_type = '增加'
+        result_dict['gas_consumption'] = abs(gas_consumption)
+        result_dict['gas_consumption_type'] = gas_consumption_type
+        result_dict['first_document'] = successive_list[0]['first_document']
+        result_dict['last_document'] = successive_list[-1]['last_document']
+        data.append(result_dict)
+    else:
+        # Do not change anything
+        data = successive_list
+        pass
+    return jsonify(data)
+
+
 # Gas Calculating by given boiler_room and boiler_no successively
 @app.route("/api/gas/calculating/gas-consumption/successive/<string:boiler_room>/<string:boiler_no>"
            "/<string:first_date>/<string:last_date>", methods=['GET'])
@@ -358,7 +397,6 @@ def calculate_gas_consumption_successive_by_boiler_room_and_no_and_date(boiler_r
                          boiler_no=boiler_no)
     # search list has been sorted!!
     search_list = get_api_info(requests.get(search_url))
-    print(search_list)
     for doc_dict in search_list:
         if doc_dict['first_document']['date'] >= first_date and doc_dict['last_document']['date'] <= last_date:
             data.append(doc_dict)
