@@ -3,18 +3,21 @@ import requests
 
 if __name__ == '__main__':
 
-    record = {
-        "boiler_room": "地点A",
-        "boiler_no": "1号锅炉",
-        "datetime": "2019-09-05 19:24:22",
-        "date": "2019-09-05",
-        "time": "19:24:22",
-        "gas_indicator": "7688607.827",
-        "employee_no": "EN0136"
-    }
+    # record = {
+    #     "boiler_room": "地点A",
+    #     "boiler_no": "1号锅炉",
+    #     "datetime": "2019-09-05 19:24:22",
+    #     "date": "2019-09-05",
+    #     "time": "19:24:22",
+    #     "gas_indicator": "7688607.827",
+    #     "employee_no": "EN0136"
+    # }
+    #
+    # result = requests.post("http://127.0.0.1:5000/api/gas/document",
+    #                        data=record)
 
-    result = requests.post("http://127.0.0.1:5000/api/gas/document",
-                           data=record)
+    j = '2019-09-04' < '2019-09-05' or '2019-09-04' > '2019-09-05'
+    print(j)
 
     # record2 = {
     #     "factory_no": "工厂A",

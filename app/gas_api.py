@@ -358,31 +358,44 @@ def calculate_gas_consumption_by_inexact_date(first_date, last_date, boiler_room
                          boiler_no=boiler_no)
     # search list has been sorted!!
     search_list = get_api_info(requests.get(search_url))
-    successive_list = list()
-    for doc_dict in search_list:
-        if doc_dict['first_document']['date'] >= first_date and doc_dict['last_document']['date'] <= last_date:
-            successive_list.append(doc_dict)
-    # the 'first_document['date'] of first item' subtract 'last_document['date'] of last item'
-    # if there is not any error:
-    result_dict = {}
-    if successive_list[0]['gas_consumption_type'] != '错误':
-        gas_consumption = round(float(successive_list[0]['first_document']['gas_indicator'])
-                                - float(successive_list[-1]['last_document']['gas_indicator']), 3)
-        if gas_consumption > 0:
-            gas_consumption_type = '减少'
-        elif gas_consumption == 0:
-            gas_consumption_type = '持平'
+    if len(search_list) >= 1:
+        if search_list[0]['gas_consumption_type'] != '错误':
+            gas_doc_list = list()
+            for consumption_dict in search_list:
+                gas_doc_list.append(consumption_dict['first_document'])
+                gas_doc_list.append(consumption_dict['last_document'])
+            # scale date
+            successive_list = list()
+            for gas_doc in gas_doc_list:
+                # pop item
+                if gas_doc['date'] >= first_date and gas_doc['date'] <= last_date:
+                    successive_list.append(gas_doc)
+            print(successive_list)
+            # this list only include gas_doc whose date in the scale you given
+            if len(successive_list) >= 1:
+                result_dict = {}
+                gas_consumption = round(float(successive_list[0]['gas_indicator'])
+                                        - float(successive_list[-1]['gas_indicator']), 3)
+                if gas_consumption > 0:
+                    gas_consumption_type = '减少'
+                elif gas_consumption == 0:
+                    gas_consumption_type = '持平'
+                else:
+                    gas_consumption_type = '增加'
+                result_dict['gas_consumption'] = abs(gas_consumption)
+                result_dict['gas_consumption_type'] = gas_consumption_type
+                result_dict['first_document'] = successive_list[0]
+                result_dict['last_document'] = successive_list[-1]
+                data.append(result_dict)
+            else:
+                error_dict = {}
+                error_dict['gas_consumption'] = 0
+                error_dict['gas_consumption_type'] = '错误'
+                error_dict['first_document'] = None
+                error_dict['last_document'] = None
+                data.append(error_dict)
         else:
-            gas_consumption_type = '增加'
-        result_dict['gas_consumption'] = abs(gas_consumption)
-        result_dict['gas_consumption_type'] = gas_consumption_type
-        result_dict['first_document'] = successive_list[0]['first_document']
-        result_dict['last_document'] = successive_list[-1]['last_document']
-        data.append(result_dict)
-    else:
-        # Do not change anything
-        data = successive_list
-        pass
+            data = search_list
     return jsonify(data)
 
 
