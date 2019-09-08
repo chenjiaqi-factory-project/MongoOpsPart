@@ -390,7 +390,7 @@ def calculate_gas_consumption_by_inexact_date(first_date, last_date, boiler_room
             else:
                 error_dict = {}
                 error_dict['gas_consumption'] = 0
-                error_dict['gas_consumption_type'] = '错误'
+                error_dict['gas_consumption_type'] = '日期区间错误'
                 error_dict['first_document'] = None
                 error_dict['last_document'] = None
                 data.append(error_dict)
