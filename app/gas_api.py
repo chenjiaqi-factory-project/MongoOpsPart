@@ -410,9 +410,17 @@ def calculate_gas_consumption_successive_by_boiler_room_and_no_and_date(boiler_r
                          boiler_no=boiler_no)
     # search list has been sorted!!
     search_list = get_api_info(requests.get(search_url))
-    for doc_dict in search_list:
-        if doc_dict['first_document']['date'] >= first_date and doc_dict['last_document']['date'] <= last_date:
-            data.append(doc_dict)
+    if len(search_list) > 1:
+        for doc_dict in search_list:
+            if doc_dict['first_document']['date'] >= first_date and doc_dict['last_document']['date'] <= last_date:
+                data.append(doc_dict)
+    else:
+        error_dict = {}
+        error_dict['gas_consumption'] = 0
+        error_dict['gas_consumption_type'] = '错误'
+        error_dict['first_document'] = None
+        error_dict['last_document'] = None
+        data.append(error_dict)
     # return search result
     return jsonify(data)
 
