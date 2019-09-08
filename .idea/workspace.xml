@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="08ea7a40-d43a-4b59-a536-69e4a5632847" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/app/gas_api.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/gas_api.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/basic_tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/basic_tests.py" afterDir="false" />
-    </list>
+    <list default="true" id="08ea7a40-d43a-4b59-a536-69e4a5632847" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -53,7 +50,7 @@
     <session id="-1640541610">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="6" />
+          <entry key="project.closed" value="7" />
           <entry key="project.open.time.1" value="4" />
           <entry key="project.open.time.13" value="1" />
           <entry key="project.open.time.2" value="1" />
@@ -150,8 +147,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/gas_api.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="262">
-              <caret line="392" column="60" selection-start-line="392" selection-start-column="54" selection-end-line="392" selection-end-column="60" />
+            <state relative-caret-position="347">
+              <caret line="397" column="30" lean-forward="true" selection-start-line="397" selection-start-column="30" selection-end-line="397" selection-end-column="30" />
               <folding>
                 <element signature="e#0#26#0" expanded="true" />
                 <marker date="1567925936767" expanded="true" signature="6150:6542" ph="..." />
@@ -475,8 +472,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app/gas_api.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="262">
-          <caret line="392" column="60" selection-start-line="392" selection-start-column="54" selection-end-line="392" selection-end-column="60" />
+        <state relative-caret-position="347">
+          <caret line="397" column="30" lean-forward="true" selection-start-line="397" selection-start-column="30" selection-end-line="397" selection-end-column="30" />
           <folding>
             <element signature="e#0#26#0" expanded="true" />
             <marker date="1567925936767" expanded="true" signature="6150:6542" ph="..." />
