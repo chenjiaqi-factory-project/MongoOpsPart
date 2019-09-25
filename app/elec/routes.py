@@ -44,8 +44,6 @@ def insert_new_document():
     new_document['time'] = request.form.get('time')
     new_document['datetime'] = request.form.get('datetime')
     new_document['elec_indicator'] = request.form.get('elec_indicator')
-    # new_document['water_out_temperature'] = request.form.get('water_out_temperature')
-    # new_document['water_in_temperature'] = request.form.get('water_in_temperature')
     new_document['employee_no'] = request.form.get('employee_no')
 
     oid = mongo.db.Elec_Collection.insert_one(new_document).inserted_id
