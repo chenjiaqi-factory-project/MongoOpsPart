@@ -295,7 +295,6 @@ def calculate_water_consumption_by_inexact_date(first_date, last_date, factory_n
                 # pop item
                 if doc['date'] >= first_date and doc['date'] <= last_date:
                     successive_list.append(doc)
-            print(successive_list)
             # this list only include gas_doc whose date in the scale you given
             if len(successive_list) >= 1:
                 result_dict = {}

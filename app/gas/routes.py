@@ -1,58 +1,58 @@
 from app import app, mongo
+from app.gas import bp
 from flask import jsonify
 from flask import request, url_for, redirect
 from werkzeug.http import HTTP_STATUS_CODES
 from bson.objectid import ObjectId
-from func_pack import create_rec_hash, get_api_info, get_api_info_first
+from func_pack import create_rec_hash, get_api_info
 from config import Config
 import requests
 
 
-# Get all water document infos
-@app.route("/api/water/document/all-documents", methods=['GET'])
-def get_all_water_documents():
+# Get all gas document infos
+@bp.route("/document/all-documents", methods=['GET'])
+def get_all_gas_documents():
     data = list()
     # the name of collection is called 'Collection'
-    for record in mongo.db.Water_Collection.find():
+    for record in mongo.db.Gas_Collection.find():
         record['_id'] = str(record['_id'])
         data.append(record)
     return jsonify(data)
 
 
-# Get water one document info by its _id
-@app.route("/api/water/document/rid/<string:rid>", methods=['GET'])
-def get_water_document_by__id(rid):
+# Get gas one document info by its _id
+@bp.route("/document/rid/<string:rid>", methods=['GET'])
+def get_gas_document_by__id(rid):
     data = list()
     # Type 'ObjectId' in Pymongo come from bson.objectid.ObjectId
     oid = ObjectId(rid)
     # the _id is unique
-    record = mongo.db.Water_Collection.find_one_or_404({"_id": oid})
+    record = mongo.db.Gas_Collection.find_one_or_404({"_id": oid})
     record['_id'] = str(record['_id'])
     data.append(record)
     return jsonify(data)
 
 
 # Insert new document infos
-@app.route("/api/water/document", methods=['POST'])
-def insert_water_new_document():
+@bp.route("/document", methods=['POST'])
+def insert_gas_new_document():
     # assemble a dict
     new_document = dict()
     new_document['document_hash'] = create_rec_hash()
-    new_document['factory_no'] = request.form.get('factory_no')
+    new_document['boiler_room'] = request.form.get('boiler_room')
+    new_document['boiler_no'] = request.form.get('boiler_no')
     new_document['date'] = request.form.get('date')
     new_document['time'] = request.form.get('time')
     new_document['datetime'] = request.form.get('datetime')
-    new_document['water_indicator'] = request.form.get('water_indicator')
-    # new_document['water_out_temperature'] = request.form.get('water_out_temperature')
-    # new_document['water_in_temperature'] = request.form.get('water_in_temperature')
+    new_document['gas_indicator'] = request.form.get('gas_indicator')
     new_document['employee_no'] = request.form.get('employee_no')
 
-    oid = mongo.db.Water_Collection.insert_one(new_document).inserted_id
+    oid = mongo.db.Gas_Collection.insert_one(new_document).inserted_id
     rid = str(oid)
 
     # return redirect(url_for('get_competition_by__id', rid=rid))
     # return the success info
-    return get_water_document_by__id(rid=rid)
+    return get_gas_document_by__id(rid=rid)
 
 
 # Mention that all items are list type in this way
@@ -71,151 +71,225 @@ def insert_water_new_document():
 
 
 # Modify an existed document info
-@app.route("/api/water/document/<string:rid>", methods=['PUT'])
-def update_water_document(rid):
+@bp.route("/document/<string:rid>", methods=['PUT'])
+def update_gas_document(rid):
     # assemble a dict
     mod_document = dict()
     mod_document['document_hash'] = request.form.get('document_hash')
-    mod_document['factory_no'] = request.form.get('factory_no')
+    mod_document['boiler_room'] = request.form.get('boiler_room')
+    mod_document['boiler_no'] = request.form.get('boiler_no')
     mod_document['date'] = request.form.get('date')
     mod_document['time'] = request.form.get('time')
     mod_document['datetime'] = request.form.get('datetime')
-    mod_document['water_indicator'] = request.form.get('water_indicator')
-    # mod_document['water_out_temperature'] = request.form.get('water_out_temperature')
-    # mod_document['water_in_temperature'] = request.form.get('water_in_temperature')
+    mod_document['gas_indicator'] = request.form.get('gas_indicator')
     mod_document['employee_no'] = request.form.get('employee_no')
 
     # pymongo update dict structure
     set_dict = {"$set": mod_document}
 
     oid = ObjectId(rid)
-    mongo.db.Water_Collection.update_one({"_id": oid}, set_dict)
+    mongo.db.Gas_Collection.update_one({"_id": oid}, set_dict)
 
     # return the success info
-    return get_water_document_by__id(rid=rid)
+    return get_gas_document_by__id(rid=rid)
 
 
-# Delete an existed water document info
-@app.route("/api/water/document/<string:rid>", methods=['DELETE'])
-def delete_water_document(rid):
+# Delete an existed gas document info
+@bp.route("/document/<string:rid>", methods=['DELETE'])
+def delete_gas_document(rid):
     set_dict = dict()
     oid = ObjectId(rid)
     set_dict['_id'] = oid
-    mongo.db.Water_Collection.delete_one(set_dict)
+    mongo.db.Gas_Collection.delete_one(set_dict)
     data = [{'_id': rid, 'deleted status': 'success'}]
     return jsonify(data)
 
 
-# Get document info by its name in fuzzy mode
-@app.route("/api/water/document/factory-no/fuzzy/<string:factory_no>", methods=['GET'])
-def get_water_document_by_factory_no_fuzzy(factory_no):
+# Get document by its boiler_room, boiler_no and date
+# Mention! There is no 'fuzzy mode' in this function
+@bp.route("/document/boiler-room-and-no-and-datetime"
+          "/<string:boiler_room>/<string:boiler_no>/<string:date>", methods=['GET'])
+def get_gas_document_by_boiler_room_and_no_and_date(boiler_room, boiler_no, date):
     data = list()
-    # using fuzzy mode with regex
-    for record in mongo.db.Water_Collection.find({"factory_no": {'$regex': factory_no}}):
+    data_search = list()
+    # maybe the data_feature in different items are same
+    for record in mongo.db.Gas_Collection.find({"date": {'$regex': date}}):
+        record['_id'] = str(record['_id'])
+        data_search.append(record)
+    # search the boiler_room, boiler_no field in the 'data_search' list
+    for document in data_search:
+        if boiler_room == document['boiler_room'] and boiler_no == document['boiler_no']:
+            data.append(document)
+    return jsonify(data)
+
+
+# Get document by its date
+@bp.route("/document/date/<string:date>", methods=['GET'])
+def get_gas_document_by_date(date):
+    data = list()
+    # maybe the data_feature in different items are same
+    for record in mongo.db.Gas_Collection.find({"date": date}):
         record['_id'] = str(record['_id'])
         data.append(record)
     return jsonify(data)
 
 
-# Get water document by its employee_no in fuzzy mode
-@app.route("/api/water/document/employee-no/fuzzy/<string:employee_no>", methods=['GET'])
-def get_water_document_by_employee_no_fuzzy(employee_no):
+# Get document info by its boiler_room in fuzzy mode
+@bp.route("/document/boiler-room/fuzzy/<string:boiler_room>", methods=['GET'])
+def get_gas_document_by_boiler_room_fuzzy(boiler_room):
     data = list()
-    # maybe the employee_no in different items are same
-    for record in mongo.db.Water_Collection.find({"employee_no": {'$regex': employee_no}}):
+    # using fuzzy mode with regex
+    for record in mongo.db.Gas_Collection.find({"boiler_room": {'$regex': boiler_room}}):
+        record['_id'] = str(record['_id'])
+        data.append(record)
+    return jsonify(data)
+
+
+# Get document info by its boiler_no in fuzzy mode
+@bp.route("/document/boiler-no/fuzzy/<string:boiler_no>", methods=['GET'])
+def get_gas_document_by_boiler_no_fuzzy(boiler_no):
+    data = list()
+    # using fuzzy mode with regex
+    for record in mongo.db.Gas_Collection.find({"boiler_no": {'$regex': boiler_no}}):
+        record['_id'] = str(record['_id'])
+        data.append(record)
+    return jsonify(data)
+
+
+# Get document info by its boiler_no and boiler_room in fuzzy mode
+@bp.route("/document/boiler-room-and-no/fuzzy/<string:boiler_room>/<string:boiler_no>", methods=['GET'])
+def get_gas_document_by_boiler_room_and_no_fuzzy(boiler_room, boiler_no):
+    data = list()
+    search_list = list()
+    search_list.append({'boiler_room': {'$regex': boiler_room}})
+    search_list.append({'boiler_no': {'$regex': boiler_no}})
+    # using fuzzy mode with regex
+    # 'and' search
+    for record in mongo.db.Gas_Collection.find({'$and': search_list}):
+        record['_id'] = str(record['_id'])
+        data.append(record)
+    return jsonify(data)
+
+
+# Get gas document by its employee_no in fuzzy mode
+@bp.route("/document/employee-no/fuzzy/<string:employee_no>", methods=['GET'])
+def get_gas_document_by_employee_no_fuzzy(employee_no):
+    data = list()
+    # maybe the hostname in different items are same
+    for record in mongo.db.Gas_Collection.find({"employee_no": {'$regex': employee_no}}):
+        record['_id'] = str(record['_id'])
+        data.append(record)
+    return jsonify(data)
+
+
+# Get gas document by its boiler_room in fuzzy mode
+@bp.route("/document/location/fuzzy/<string:boiler_room>", methods=['GET'])
+def get_gas_document_by_location_fuzzy(boiler_room):
+    data = list()
+    # maybe the location in different items are same
+    for record in mongo.db.Gas_Collection.find({"boiler_room": {'$regex': boiler_room}}):
         record['_id'] = str(record['_id'])
         data.append(record)
     return jsonify(data)
 
 
 # Get document by its datetime in fuzzy mode
-@app.route("/api/water/document/datetime/fuzzy/<string:datetime>", methods=['GET'])
-def get_water_document_by_datetime_fuzzy(datetime):
+@bp.route("/document/datetime/fuzzy/<string:datetime>", methods=['GET'])
+def get_gas_document_by_datetime_fuzzy(datetime):
     data = list()
-    # maybe the datetime in different items are same
-    for record in mongo.db.Water_Collection.find({"datetime": {'$regex': datetime}}):
+    # maybe the data_feature in different items are same
+    for record in mongo.db.Gas_Collection.find({"datetime": {'$regex': datetime}}):
         record['_id'] = str(record['_id'])
         data.append(record)
     return jsonify(data)
 
 
 # Get document by its date in fuzzy mode
-@app.route("/api/water/document/date/fuzzy/<string:date>", methods=['GET'])
-def get_water_document_by_date_fuzzy(date):
+@bp.route("/document/date/fuzzy/<string:date>", methods=['GET'])
+def get_gas_document_by_date_fuzzy(date):
     data = list()
     # maybe the data_feature in different items are same
-    for record in mongo.db.Water_Collection.find({"date": {'$regex': date}}):
+    for record in mongo.db.Gas_Collection.find({"date": {'$regex': date}}):
         record['_id'] = str(record['_id'])
         data.append(record)
     return jsonify(data)
 
 
-# Get document by its factory_no and date
-# Mention! There is no 'fuzzy mode' in this function
-@app.route("/api/water/document/factory-no-and-datetime"
-           "/<string:factory_no>/<string:date>", methods=['GET'])
-def get_water_document_by_factory_no_and_date(factory_no, date):
+# Fuzzy Search by boiler_no, employee_no, boiler_room or datetime
+@bp.route("/document/doc-search/fuzzy/<string:keyword>", methods=['GET'])
+def search_gas_document_fuzzy_single_keyword(keyword):
     data = list()
-    data_search = list()
-    # 'date' field may contain many records
-    for record in mongo.db.Water_Collection.find({"date": {'$regex': date}}):
+    search_list = list()
+    search_list.append({'boiler_no': {'$regex': keyword}})
+    search_list.append({'employee_no': {'$regex': keyword}})
+    search_list.append({'boiler_room': {'$regex': keyword}})
+    search_list.append({'datetime': {'$regex': keyword}})
+
+    # # 'and' search
+    # for record in mongo.db.Competition.find({'$and': search_list}):
+    #     record['_id'] = str(record['_id'])
+    #     data.append(record)
+
+    # 'or' search (using unique _id to make sure no duplication)
+    for record in mongo.db.Gas_Collection.find({'$or': search_list}):
         record['_id'] = str(record['_id'])
-        data_search.append(record)
-    # search the factory_no field in the 'data_search' list
-    for document in data_search:
-        if factory_no == document['factory_no']:
-            data.append(document)
+        data.append(record)
+
+    # Dedup no more
+    # data_dedup = list(set(data))
+    # data_dedup.sort(key=data.index)
+    # return jsonify(data_dedup)
     return jsonify(data)
 
 
-# Water Calculating Functions by a exact given date
-@app.route("/api/water/calculating/water-consumption/exact-date/<string:factory_no>"
-           "/<string:first_date>/<string:last_date>", methods=['GET'])
-def calculate_water_consumption_by_given_date(first_date, last_date, factory_no):
+# Gas Calculating Functions by a exact given date
+@bp.route("/calculating/gas-consumption/exact-date/<string:boiler_room>/<string:boiler_no>"
+          "/<string:first_date>/<string:last_date>", methods=['GET'])
+def calculate_gas_consumption_by_given_date(first_date, last_date, boiler_room, boiler_no):
     data = list()
     result_dict = {}
     # assemble url
     search_first_url = 'http://' + Config.LOCALHOST_IP_PORT + \
-                       url_for('get_water_document_by_factory_no_and_date', factory_no=factory_no,
-                               date=first_date)
+                       url_for('gas.get_gas_document_by_boiler_room_and_no_and_date', boiler_room=boiler_room,
+                               boiler_no=boiler_no, date=first_date)
     search_last_url = 'http://' + Config.LOCALHOST_IP_PORT + \
-                      url_for('get_water_document_by_factory_no_and_date', factory_no=factory_no,
-                              date=last_date)
+                      url_for('gas.get_gas_document_by_boiler_room_and_no_and_date', boiler_room=boiler_room,
+                              boiler_no=boiler_no, date=last_date)
     first_date_doc_list = get_api_info(requests.get(search_first_url))
     last_date_doc_list = get_api_info(requests.get(search_last_url))
     # if all things are correct
     if len(first_date_doc_list) >= 1 and len(last_date_doc_list) >= 1:
         first_doc = first_date_doc_list[0]
         last_doc = last_date_doc_list[0]
-        water_consumption = round(float(first_doc['water_indicator']) - float(last_doc['water_indicator']), 3)
-        if water_consumption > 0:
-            water_consumption_type = '减少'
-        elif water_consumption == 0:
-            water_consumption_type = '持平'
+        gas_consumption = round(float(first_doc['gas_indicator']) - float(last_doc['gas_indicator']), 3)
+        if gas_consumption > 0:
+            gas_consumption_type = '减少'
+        elif gas_consumption == 0:
+            gas_consumption_type = '持平'
         else:
-            water_consumption_type = '增加'
-        result_dict['water_consumption'] = abs(water_consumption)
-        result_dict['water_consumption_type'] = water_consumption_type
+            gas_consumption_type = '增加'
+        result_dict['gas_consumption'] = abs(gas_consumption)
+        result_dict['gas_consumption_type'] = gas_consumption_type
         result_dict['first_document'] = first_doc
         result_dict['last_document'] = last_doc
     # else Cannot find all relative document
     elif len(first_date_doc_list) < 1 and len(last_date_doc_list) < 1:
-        result_dict['water_consumption'] = 0
-        result_dict['water_consumption_type'] = '错误'
+        result_dict['gas_consumption'] = 0
+        result_dict['gas_consumption_type'] = '错误'
         result_dict['first_document'] = None
         result_dict['last_document'] = None
     # else Cannot find first relative document
     elif len(first_date_doc_list) < 1:
         last_doc = last_date_doc_list[0]
-        result_dict['water_consumption'] = 0
-        result_dict['water_consumption_type'] = '错误'
+        result_dict['gas_consumption'] = 0
+        result_dict['gas_consumption_type'] = '错误'
         result_dict['first_document'] = None
         result_dict['last_document'] = last_doc
     # else Cannot find last relative document
     elif len(last_date_doc_list) < 1:
         first_doc = first_date_doc_list[0]
-        result_dict['water_consumption'] = 0
-        result_dict['water_consumption_type'] = '错误'
+        result_dict['gas_consumption'] = 0
+        result_dict['gas_consumption_type'] = '错误'
         result_dict['first_document'] = first_doc
         result_dict['last_document'] = None
     # return result
@@ -223,13 +297,13 @@ def calculate_water_consumption_by_given_date(first_date, last_date, factory_no)
     return jsonify(data)
 
 
-# Water Calculating by given boiler_room and boiler_no successively
-@app.route("/api/gas/calculating/gas-consumption/successive/<string:boiler_room>/<string:boiler_no>", methods=['GET'])
+# Gas Calculating by given boiler_room and boiler_no successively
+@bp.route("/calculating/gas-consumption/successive/<string:boiler_room>/<string:boiler_no>", methods=['GET'])
 def calculate_gas_consumption_successive_by_boiler_room_and_no(boiler_room, boiler_no):
     data = list()
     # assemble url
     search_url = 'http://' + Config.LOCALHOST_IP_PORT + \
-                 url_for('get_gas_document_by_boiler_room_and_no_fuzzy', boiler_room=boiler_room,
+                 url_for('gas.get_gas_document_by_boiler_room_and_no_fuzzy', boiler_room=boiler_room,
                          boiler_no=boiler_no)
     search_list = get_api_info(requests.get(search_url))
     # if there are at least 2 docs, that's mean it can be calculated
@@ -257,9 +331,9 @@ def calculate_gas_consumption_successive_by_boiler_room_and_no(boiler_room, boil
     elif len(search_list) == 1:
         error_dict = {}
         error_dict['gas_consumption'] = 0
-        error_dict['gas_consumption_type'] = '错误'
+        error_dict['gas_consumption_type'] = '只有一条数据'
         error_dict['first_document'] = search_list[0]
-        error_dict['last_document'] = None
+        error_dict['last_document'] = search_list[0]
         data.append(error_dict)
     else:
         error_dict = {}
@@ -272,14 +346,14 @@ def calculate_gas_consumption_successive_by_boiler_room_and_no(boiler_room, boil
     return jsonify(data)
 
 
-# Water Calculating Functions by a inexact given date
-@app.route("/api/water/calculating/water-consumption/inexact-date/<string:factory_no>"
-           "/<string:first_date>/<string:last_date>", methods=['GET'])
-def calculate_water_consumption_by_inexact_date(first_date, last_date, factory_no):
+# Gas Calculating Functions by a inexact given date
+@bp.route("/calculating/gas-consumption/inexact-date/<string:boiler_room>/<string:boiler_no>"
+          "/<string:first_date>/<string:last_date>", methods=['GET'])
+def calculate_gas_consumption_by_inexact_date(first_date, last_date, boiler_room, boiler_no):
     data = list()
     # assemble url
     search_url = 'http://' + Config.LOCALHOST_IP_PORT + \
-                 url_for('calculate__consumption_successive_by_boiler_room_and_no', boiler_room=boiler_room,
+                 url_for('gas.calculate_gas_consumption_successive_by_boiler_room_and_no', boiler_room=boiler_room,
                          boiler_no=boiler_no)
     # search list has been sorted!!
     search_list = get_api_info(requests.get(search_url))
@@ -295,7 +369,6 @@ def calculate_water_consumption_by_inexact_date(first_date, last_date, factory_n
                 # pop item
                 if gas_doc['date'] >= first_date and gas_doc['date'] <= last_date:
                     successive_list.append(gas_doc)
-            print(successive_list)
             # this list only include gas_doc whose date in the scale you given
             if len(successive_list) >= 1:
                 result_dict = {}
@@ -325,13 +398,13 @@ def calculate_water_consumption_by_inexact_date(first_date, last_date, factory_n
 
 
 # Gas Calculating by given boiler_room and boiler_no successively
-@app.route("/api/gas/calculating/gas-consumption/successive/<string:boiler_room>/<string:boiler_no>"
-           "/<string:first_date>/<string:last_date>", methods=['GET'])
+@bp.route("/calculating/gas-consumption/successive/<string:boiler_room>/<string:boiler_no>"
+          "/<string:first_date>/<string:last_date>", methods=['GET'])
 def calculate_gas_consumption_successive_by_boiler_room_and_no_and_date(boiler_room, boiler_no, first_date, last_date):
     data = list()
     # assemble url
     search_url = 'http://' + Config.LOCALHOST_IP_PORT + \
-                 url_for('calculate_gas_consumption_successive_by_boiler_room_and_no', boiler_room=boiler_room,
+                 url_for('gas.calculate_gas_consumption_successive_by_boiler_room_and_no', boiler_room=boiler_room,
                          boiler_no=boiler_no)
     # search list has been sorted!!
     search_list = get_api_info(requests.get(search_url))
@@ -347,32 +420,6 @@ def calculate_gas_consumption_successive_by_boiler_room_and_no_and_date(boiler_r
         error_dict['last_document'] = None
         data.append(error_dict)
     # return search result
-    return jsonify(data)
-
-
-# Fuzzy Search by factory_no, employee_no, boiler_room or datetime
-@app.route("/api/water/document/doc-search/fuzzy/<string:keyword>", methods=['GET'])
-def search_water_document_fuzzy_single_keyword(keyword):
-    data = list()
-    search_list = list()
-    search_list.append({'factory_no': {'$regex': keyword}})
-    search_list.append({'employee_no': {'$regex': keyword}})
-    search_list.append({'datetime': {'$regex': keyword}})
-
-    # # 'and' search
-    # for record in mongo.db.Competition.find({'$and': search_list}):
-    #     record['_id'] = str(record['_id'])
-    #     data.append(record)
-
-    # 'or' search (using unique _id to make sure no duplication)
-    for record in mongo.db.Water_Collection.find({'$or': search_list}):
-        record['_id'] = str(record['_id'])
-        data.append(record)
-
-    # Dedup no more
-    # data_dedup = list(set(data))
-    # data_dedup.sort(key=data.index)
-    # return jsonify(data_dedup)
     return jsonify(data)
 
 
