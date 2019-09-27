@@ -46,6 +46,7 @@ def insert_gas_new_document():
     new_document['datetime'] = request.form.get('datetime')
     new_document['gas_indicator'] = request.form.get('gas_indicator')
     new_document['employee_no'] = request.form.get('employee_no')
+    new_document['employee_name'] = request.form.get('employee_name')
 
     oid = mongo.db.Gas_Collection.insert_one(new_document).inserted_id
     rid = str(oid)
@@ -83,6 +84,7 @@ def update_gas_document(rid):
     mod_document['datetime'] = request.form.get('datetime')
     mod_document['gas_indicator'] = request.form.get('gas_indicator')
     mod_document['employee_no'] = request.form.get('employee_no')
+    mod_document['employee_name'] = request.form.get('employee_name')
 
     # pymongo update dict structure
     set_dict = {"$set": mod_document}

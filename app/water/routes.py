@@ -47,6 +47,7 @@ def insert_water_new_document():
     # new_document['water_out_temperature'] = request.form.get('water_out_temperature')
     # new_document['water_in_temperature'] = request.form.get('water_in_temperature')
     new_document['employee_no'] = request.form.get('employee_no')
+    new_document['employee_name'] = request.form.get('employee_name')
 
     oid = mongo.db.Water_Collection.insert_one(new_document).inserted_id
     rid = str(oid)
@@ -85,6 +86,7 @@ def update_water_document(rid):
     # mod_document['water_out_temperature'] = request.form.get('water_out_temperature')
     # mod_document['water_in_temperature'] = request.form.get('water_in_temperature')
     mod_document['employee_no'] = request.form.get('employee_no')
+    mod_document['employee_name'] = request.form.get('employee_name')
 
     # pymongo update dict structure
     set_dict = {"$set": mod_document}
